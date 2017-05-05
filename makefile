@@ -6,7 +6,7 @@ LDFLAGS =  /usr/local/lib/gzstream.o -L/usr/local/lib -lz
 CFLAGS = -std=c++11 -I/usr/local/include
 
 swig : $(objects)
-		$(CC) $(CFLAGS) -o swig $(objects) $(LDFLAGS)
+		$(CC) $(CFLAGS) -o lofasmrec $(objects) $(LDFLAGS)
 
 cfg.o : cfg.cpp cfg.h
 		$(CC) $(CFLAGS) -c cfg.cpp
