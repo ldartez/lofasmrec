@@ -2,8 +2,8 @@ objects = main.o cfg.o err.o fhdrv3.o lfrec.o mjd.o
 
 
 CC = g++
-LDFLAGS =  /usr/local/lib/gzstream.o -L/usr/local/lib -lz
-CFLAGS = -std=c++11 -I/usr/local/include
+LDFLAGS =  -lz -lgzstream
+CFLAGS = -std=c++11
 
 swig : $(objects)
 		$(CC) $(CFLAGS) -o lofasmrec $(objects) $(LDFLAGS)
