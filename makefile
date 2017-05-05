@@ -27,4 +27,4 @@ mjd.o : mjd.cpp mjd.h
 		$(CC) $(CFLAGS) -c mjd.cpp
 
 clean :
-		rm swig $(objects)
+		rm lofasmrec $(objects)
