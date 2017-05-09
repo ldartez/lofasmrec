@@ -25,11 +25,17 @@
 #include "mjd.h"
 #include "err.h"
 #include "cfg.h"
+#include "obs.h"
 
 
 using std::cout;
 using std::endl;
 using std::string;
+
+
+// Class Definition
+
+
 
 void record_timed(float recdur, Configuration cfg)
 {
@@ -49,6 +55,7 @@ void record_timed(float recdur, Configuration cfg)
     string dataroot = cfg.dataroot;
     int station_id = cfg.station_id;
 
+    //int sock, nblk, btotal;
     int sock, Nblocks, samp_len, nblk, ntotal;
     int Nsamp; // filterbank samples in each block
     int Npkts; // network packets in each block
@@ -56,8 +63,8 @@ void record_timed(float recdur, Configuration cfg)
     char lfhdr[109];
     char fname[23];
     char buf[8192]; // buffer to hold socket data
-    int Npkts_lastblock = 0; // placeholder for number of packets in the last block
-    int recdur_lastblock = 0; //placeholder for duration (in seconds) of last block
+    int Npkts_lastblock; // placeholder for number of packets in the last block
+    int recdur_lastblock; //placeholder for duration (in seconds) of last block
 
     socklen_t addr_length;
     struct sockaddr_in server;
@@ -73,6 +80,12 @@ void record_timed(float recdur, Configuration cfg)
     std::strcpy(&fp[0], dataroot.c_str());
     char *fpath = &fp[0];
 
+    Observation obs = Observation(recdur, cfg);
+    Nblocks = obs.Nblocks;
+    Npkts = obs.Npkts;
+    Npkts_lastblock = obs.Npkts_lastblock;
+
+/*
     tsamp = 0.084; // seconds
     samp_len = 17 * 8192; // bytes, size of an entire filterbank sample or integration
 
@@ -103,6 +116,8 @@ void record_timed(float recdur, Configuration cfg)
     cout << "Number of files: " << Nblocks << endl;
     cout << "Number of samples per file: " << Nsamp << endl;
     cout << "File size: " << Nsamp*samp_len+108 << " bytes" << endl;
+*/
+
 
     // create inet socket
     sock = socket(PF_INET, SOCK_DGRAM, 0);

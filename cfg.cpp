@@ -75,6 +75,14 @@ Configuration::Configuration(char *infile)
         {
             incoming_port_10gbe = std::stoi(field.value);
         }
+        else if (field.name == "tsamp")
+        {
+            tsamp = std::stof(field.value);
+        }
+        else if (field.name == "samp_len")
+        {
+            samp_len = std::stoi(field.value);
+        }
     }
 }
 
@@ -117,18 +125,24 @@ int Configuration::readcfg() {
 
     return linecount;
 }
+
+
 void Configuration::print()
 {
     /*
     print all configuration fields
     */
 
+    std::cout << "=========== LoFASM Rec. Configuration ============\n";
+
     int n = cfgfields->size();
     for (int i=0; i<n; i++)
     {
-        std::cout << i+1 << ". " << (*cfgfields)[i]->name << ": ";
+        std::cout << (*cfgfields)[i]->name << ":\t";
         std::cout << (*cfgfields)[i]->value << std::endl;
     }
+
+    std::cout << "==================================================\n";
 
 
 }

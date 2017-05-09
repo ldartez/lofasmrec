@@ -43,6 +43,7 @@
 #include "lfrec.h"  // LoFASM recording routines
 #include "cfg.h"    // LoFASM configuration parsing routines
 #include "err.h"    // functions to print error messages
+#include "obs.h"
 
 
 using std::cout;
@@ -53,6 +54,7 @@ using std::vector;
 void error(const char*);
 void print_usage(char *);
 char* get_default_cfg();
+void print_summary(float, Configuration);
 
 // global variables
 
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]) {
     bool tflag = false; // timed recording set
     bool oflag = false; // output directory set
     bool usercfg = false; // user-defined config
+    bool printSummary = false;
     char *outputdir = nullptr;
     float tin;
     int c;
@@ -90,19 +93,11 @@ int main(int argc, char *argv[]) {
         t: number of seconds to record for
         c: specify configuration file to read. if not provided then default is used.
     */
-    while ((c = getopt(argc, argv, "c:h")) != -1)
+    while ((c = getopt(argc, argv, "c:hl")) != -1)
     {
         switch (c)
         {
-            /*
-            case 't':
-            {
-                tflag = true;
-                tin = std::stoi(optarg);
-                std::cout << "tin: " << tin << std::endl;
-                break;
-            }
-            */
+
             case 'c':
             {
                 std::cout << "Using config file: " << (std::string) optarg << std::endl;
@@ -115,6 +110,12 @@ int main(int argc, char *argv[]) {
             {
                 print_usage(argv[0]);
                 exit(0);
+                break;
+            }
+
+            case 'l':
+            {
+                printSummary = true;
                 break;
             }
 
@@ -142,15 +143,20 @@ int main(int argc, char *argv[]) {
 
     if (!usercfg)
     {
-        cout << "Please specify a configuration file.\n";
-        print_usage(argv[0]);
-        exit(0);
+        //cout << "Please specify a configuration file.\n";
+        //print_usage(argv[0]);
+        //exit(0);
+
+        cout << "Using default configuration file: /home/controller/.lofasm/lofasm.cfg\n";
+        cfg = new Configuration("/home/controller/.lofasm/lofasm.cfg");
+
     }
 
-    if (optind = argc-1)
+
+    // set tin if found in command line, else print usage and exit
+    if (optind == argc-1)
     {
         tin = std::atof(argv[optind]);
-        record_timed(tin, *cfg);
     }
     else
     {
@@ -158,7 +164,16 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
+    // print observation summary for debugging
+    if (printSummary)
+    {
+        print_summary(tin, *cfg);
+        Observation obs = Observation(tin, *cfg);
+        obs.print();
+        exit(0);
+    }
 
+    record_timed(tin, *cfg);
     exit(0);
 }
 
@@ -166,8 +181,15 @@ int main(int argc, char *argv[]) {
 // function definitions
 
 void print_usage(char *pname) {
-    cout << "Usage: " << pname << " [-h] -c config_file recdur\n";
+    cout << "Usage: " << pname << " [-h] [-l] [-c config_file] recdur\n";
     cout << "Options: \n";
-    cout << "\tc: Path to configuration file to use.\n";
-    cout << "\th: Print this menu and exit.\n";
+    cout << "\t-c config_file: Path to configuration file to use.\n";
+    cout << "\t-h: Print this menu and exit.\n";
+    cout << "\t-l: Print job summary and exit.\n";
+}
+
+
+void print_summary(float tin, Configuration cfg)
+{
+    cfg.print();
 }

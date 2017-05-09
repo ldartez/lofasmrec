@@ -26,7 +26,7 @@ const char HDRINTTIME[HDRENTRYLEN+1] = "0.083886";
 const char HDRFMTVER[HDRENTRYLEN+1] = "       1";
 const char HDRRA[11] = "          "; // to be populated later
 const char HDRDEC[11] = "          "; // to be populated later
-
+const int HDRLENGTH = 108;
 
 void construct_hdrV3(char *, time_t, int);
 
