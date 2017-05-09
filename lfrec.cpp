@@ -21,7 +21,8 @@
 #include "gzstream.h"
 
 #include "lfrec.h"
-#include "fhdrv3.h"
+//#include "fhdrv3.h"
+#include "fhdrv4.h"
 #include "mjd.h"
 #include "err.h"
 #include "cfg.h"
@@ -146,8 +147,17 @@ void record_timed(float recdur, Configuration cfg)
     for (int i=0; i<Nblocks; i++) // block loop
     {
         nblk = 0;
+
+        // check if we need a special final block
+        if (i == Nblocks-1 && Npkts_lastblock)
+        {
+            Npkts = Npkts_lastblock;
+        }
+
+        
         t = construct_filename(fname); // load filename into fname and corresponding time_t into t
-        construct_hdrV3(lfhdr, t, station_id);     // load header into lfhdr
+        //construct_hdrV3(lfhdr, t, station_id);     // load header into lfhdr
+        construct_hdrV4(lfhdr, t, station_id, Npkts);     // load header into lfhdr
 
         strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
 
@@ -159,13 +169,9 @@ void record_timed(float recdur, Configuration cfg)
         ogzstream ofile(fpath);
 
         // write file header
-        ofile.write(lfhdr, 108);
+        ofile.write(lfhdr, HDRLENGTH);
 
-        // check if we need a special final block
-        if (i == Nblocks-1 && Npkts_lastblock)
-        {
-            Npkts = Npkts_lastblock;
-        }
+
 
         for (int k=0; k<Npkts; k++)
         { // packet loop
