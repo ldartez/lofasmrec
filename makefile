@@ -24,5 +24,3 @@ obs.o: obs.cpp obs.h cfg.h
 		$(CC) $(CFLAGS) -c obs.cpp
 clean :
 		rm lofasmrec $(objects)
-install : lofasmrec
-		cp lofasmrec /home/controller/bin/.
