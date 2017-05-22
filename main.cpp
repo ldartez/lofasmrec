@@ -36,7 +36,7 @@
 
 #include <iomanip>
 #include <chrono>
-
+#include <string>
 
 // LoFASM header files
 #include "fhdrv3.h" // LoFASM file header version 3 routines
@@ -76,13 +76,6 @@ int main(int argc, char *argv[]) {
     int pid = -1;
     int argindex;
 
-
-    // program commands
-    std::string command;
-    std::string START = "start";
-    std::string STOP = "stop";
-    std::string RESTART = "restart";
-    std::string STATUS = "status";
 
     opterr = 0;
 
@@ -143,12 +136,10 @@ int main(int argc, char *argv[]) {
 
     if (!usercfg)
     {
-        //cout << "Please specify a configuration file.\n";
-        //print_usage(argv[0]);
-        //exit(0);
 
+         const char *cfg_path = "/home/controller/.lofasm/lofasm.cfg";
         cout << "Using default configuration file: /home/controller/.lofasm/lofasm.cfg\n";
-        cfg = new Configuration("/home/controller/.lofasm/lofasm.cfg");
+        cfg = new Configuration(cfg_path);
 
     }
 

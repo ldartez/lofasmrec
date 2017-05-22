@@ -23,12 +23,13 @@
 #include "err.h"
 
 
-Configuration::Configuration(char *infile)
+Configuration::Configuration(const char *infile)
 {
     cfgfields = new std::vector<cfgfield*>;
     cfgfile = infile;
 
     n = readcfg();
+
 
     //populate member variables
     for (int i=0; i<n; i++)
@@ -82,6 +83,14 @@ Configuration::Configuration(char *infile)
         else if (field.name == "samp_len")
         {
             samp_len = std::stoi(field.value);
+        }
+        else if (field.name == "hdr_on")
+        {
+            hdr_on = std::stoi(field.value);
+        }
+        else if (field.name == "hdr_version")
+        {
+            hdr_version = std::stoi(field.value);
         }
     }
 }

@@ -21,8 +21,8 @@
 #include "gzstream.h"
 
 #include "lfrec.h"
-//#include "fhdrv3.h"
-#include "fhdrv4.h"
+#include "fhdrv3.h"
+//#include "fhdrv4.h"
 #include "mjd.h"
 #include "err.h"
 #include "cfg.h"
@@ -55,6 +55,8 @@ void record_timed(float recdur, Configuration cfg)
     int port_in = cfg.incoming_port_10gbe;
     string dataroot = cfg.dataroot;
     int station_id = cfg.station_id;
+    bool hdr_on = cfg.hdr_on;
+    bool hdr_version = cfg.hdr_version;
 
     //int sock, nblk, btotal;
     int sock, Nblocks, samp_len, nblk, ntotal;
@@ -85,39 +87,6 @@ void record_timed(float recdur, Configuration cfg)
     Nblocks = obs.Nblocks;
     Npkts = obs.Npkts;
     Npkts_lastblock = obs.Npkts_lastblock;
-
-/*
-    tsamp = 0.084; // seconds
-    samp_len = 17 * 8192; // bytes, size of an entire filterbank sample or integration
-
-    // calculate number of blocks (files)
-    if (recdur < blocktime || recdur == blocktime) // total duration is less than default blocktime
-    {
-        blocktime = recdur;
-        Nblocks = 1;
-    }
-    else if (fmod(recdur,blocktime) == 0) // total duration is exact multiple of default blocktime
-    {
-        Nblocks = (int) recdur/blocktime;
-    }
-    else // total duration is not a multiple of default blocktime. the last block will only contain the leftover data.
-    {
-        Nblocks = (int) recdur/blocktime;
-        recdur_lastblock = fmod(recdur,blocktime);
-        Npkts_lastblock = ((int) floor(recdur_lastblock / tsamp) + 1) * 17;
-    }
-
-    //calculate number of samples per block
-    Nsamp = ((int) floor(blocktime / tsamp) + 1); // always get just one extra sample
-
-    Npkts = Nsamp * 17; // total number of UDP packets per block
-
-
-    cout << "Recording for " << recdur  << " seconds.\n";
-    cout << "Number of files: " << Nblocks << endl;
-    cout << "Number of samples per file: " << Nsamp << endl;
-    cout << "File size: " << Nsamp*samp_len+108 << " bytes" << endl;
-*/
 
 
     // create inet socket
@@ -154,10 +123,7 @@ void record_timed(float recdur, Configuration cfg)
             Npkts = Npkts_lastblock;
         }
 
-        
         t = construct_filename(fname); // load filename into fname and corresponding time_t into t
-        //construct_hdrV3(lfhdr, t, station_id);     // load header into lfhdr
-        construct_hdrV4(lfhdr, t, station_id, Npkts);     // load header into lfhdr
 
         strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
 
@@ -168,9 +134,28 @@ void record_timed(float recdur, Configuration cfg)
         //std::ofstream ofile (fpath, std::ofstream::binary);
         ogzstream ofile(fpath);
 
-        // write file header
-        ofile.write(lfhdr, HDRLENGTH);
 
+        if (hdr_on)
+        {
+            if (hdr_version == 3)
+            {
+                construct_hdrV3(lfhdr, t, station_id);  // load header into lfhdr
+            }
+            /*
+            else if (hdr_version == 4)
+            {
+                construct_hdrV4(lfhdr, t, station_id, Npkts);     // load header into lfhdr
+
+            }
+            */
+            else
+            {
+                error("header version unrecognized");
+            }
+
+            // write file header
+            ofile.write(lfhdr, HDRLENGTH);
+        }
 
 
         for (int k=0; k<Npkts; k++)
