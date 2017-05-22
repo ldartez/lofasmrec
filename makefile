@@ -1,4 +1,4 @@
-objects = main.o cfg.o err.o fhdrv4.o lfrec.o mjd.o obs.o
+objects = main.o cfg.o err.o fhdrv3.o lfrec.o mjd.o obs.o
 
 CC = g++
 LDFLAGS = -lgzstream -lz
