@@ -91,6 +91,24 @@ Configuration::Configuration(const char *infile)
         else if (field.name == "hdr_version")
         {
             hdr_version = std::stoi(field.value);
+            if (hdr_version == 3){
+                hdrlength = 108;
+            }
+            else if (hdr_version == 4){
+                hdrlength = 96;
+            }
+        }
+        else if (field.name == "rec_mode")
+        {
+            rec_mode = std::stoi(field.value);
+        }
+        else if (field.name == "blocksize")
+        {
+            blocksize = std::stoi(field.value); // max size of each file in bytes
+        }
+        else if (field.name == "bbr_id")
+        {
+            bbr_id = std::stoi(field.value);
         }
     }
 }

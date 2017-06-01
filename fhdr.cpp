@@ -2,7 +2,8 @@
 // Created by Louis Dartez on 3/5/17.
 //
 
-#include "fhdrv3.h"
+#include "fhdr.h"
+
 #ifndef STRINGH_INCLUDE_GUARD
 #define STRINGH_INCLUDE_GUARD
 #include <string.h>
@@ -14,8 +15,9 @@
 #endif
 
 #include "mjd.h"
+#include "err.h"
 
-void construct_hdrV4(char *buf, time_t t, int station_id, int Nsamp)
+void constructFileHeader(char *buf, time_t t, int header_version, int station_id, int Nsamp)
 {
     /*
      * Construct header string for .lofasm data format
@@ -26,27 +28,47 @@ void construct_hdrV4(char *buf, time_t t, int station_id, int Nsamp)
      * For V4 buf should have space for at least 96 characters.
      */
 
-    double *mjdvals = new double [2]; // storage for the numeric mjd values
+    //double *mjdvals = new double [2]; // storage for the numeric mjd values
+    mjd_t *m = new mjd_t;
     char mjdday[9] = "        ";
     char mjdms[9] = "        ";
     char station[9] = "        ";
     char nsamples[9] = "        ";
+    char hlen[9] = "        ";
+    char hver[9] = "        ";
+    int offset, offset_len, offset_ver;
+    std::string hdrlen, hdrver;
 
 
     // calculate MJD values needed for the header
-    mjd(mjdvals, t);
+    mjd(m, t);
 
     // convert values to strings
-    std::string day = std::to_string((int) mjdvals[0]); // this will be 5 characters long for many years
-    std::string ms = std::to_string(mjdvals[1]);
+    std::string day = std::to_string((int) m->days); // this will be 5 characters long for many years
+    std::string ms = std::to_string(m->ms);
     std::string station_str = std::to_string(station_id);
     std::string nsamp_str = std::to_string(Nsamp);
+   
+    if (header_version == 3){
+        hdrlen = std::to_string((int) 108);
+        hdrver = std::to_string((int) header_version);
+        offset_len = HDRENTRYLEN - hdrlen.size();
+        offset_ver = HDRENTRYLEN - hdrver.size();
+    }
+    else if (header_version == 4){
+        hdrlen = std::to_string((int) 96);
+        hdrver = std::to_string((int) header_version);
+        offset_len = HDRENTRYLEN - hdrlen.size();
+        offset_ver = HDRENTRYLEN - hdrver.size();
+    }
+    strncpy(hlen+offset_len, hdrlen.c_str(), hdrlen.size());
+    strncpy(hver+offset_ver, hdrver.c_str(), hdrver.size());
 
     strncpy(mjdms, ms.c_str(), ms.size());
     strncpy(mjdday, day.c_str(), day.size());
 
     //copy station id number into padded character array
-    int offset = HDRENTRYLEN - station_str.size();
+    offset = HDRENTRYLEN - station_str.size();
     strncpy(station+offset, station_str.c_str(), station_str.size());
 
     //copy nsamples into padded character array
@@ -55,8 +77,8 @@ void construct_hdrV4(char *buf, time_t t, int station_id, int Nsamp)
 
 
     strncpy(buf, HDRSIG, (size_t) HDRENTRYLEN);
-    strncpy(buf+HDRENTRYLEN, HDRVER, (size_t) HDRENTRYLEN);
-    strncpy(buf+2*HDRENTRYLEN, HDRLEN, (size_t) HDRENTRYLEN);
+    strncpy(buf+HDRENTRYLEN, hver, (size_t) HDRENTRYLEN);
+    strncpy(buf+2*HDRENTRYLEN, hlen, (size_t) HDRENTRYLEN);
     strncpy(buf+3*HDRENTRYLEN, station, (size_t) HDRENTRYLEN);
     strncpy(buf+4*HDRENTRYLEN, HDRNBINS, (size_t) HDRENTRYLEN);
     strncpy(buf+5*HDRENTRYLEN, HDRFSTART, (size_t) HDRENTRYLEN);
@@ -65,6 +87,16 @@ void construct_hdrV4(char *buf, time_t t, int station_id, int Nsamp)
     strncpy(buf+8*HDRENTRYLEN, mjdms, (size_t) HDRENTRYLEN);
     strncpy(buf+9*HDRENTRYLEN, HDRINTTIME, (size_t) HDRENTRYLEN);
     strncpy(buf+10*HDRENTRYLEN, HDRFMTVER, (size_t) HDRENTRYLEN);
-    strncpy(buf+11*HDRENTRYLEN, nsamples, (size_t) HDRENTRYLEN);
+    
+    if (header_version == 3){
+        strncpy(buf+11*HDRENTRYLEN, "          ", (size_t) 10);
+        strncpy(buf+11*HDRENTRYLEN+10, "          ", (size_t) 10);
+    }
+    else if (header_version == 4){
+        strncpy(buf+11*HDRENTRYLEN, nsamples, (size_t) HDRENTRYLEN);
+    }
+    else {
+        error("unrecognized header format");
+    }
 
 }

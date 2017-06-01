@@ -39,7 +39,7 @@
 #include <string>
 
 // LoFASM header files
-#include "fhdrv3.h" // LoFASM file header version 3 routines
+#include "fhdr.h" // LoFASM file header version 3 routines
 #include "lfrec.h"  // LoFASM recording routines
 #include "cfg.h"    // LoFASM configuration parsing routines
 #include "err.h"    // functions to print error messages
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
     {
 
          const char *cfg_path = "/home/controller/.lofasm/lofasm.cfg";
-        cout << "Using default configuration file: /home/controller/.lofasm/lofasm.cfg\n";
+        cout << "\nUsing default configuration file: /home/controller/.lofasm/lofasm.cfg\n";
         cfg = new Configuration(cfg_path);
 
     }
@@ -159,8 +159,9 @@ int main(int argc, char *argv[]) {
     if (printSummary)
     {
         print_summary(tin, *cfg);
-        Observation obs = Observation(tin, *cfg);
-        obs.print();
+        Observation *obs = new Observation(tin, *cfg);
+        obs->print();
+
         exit(0);
     }
 

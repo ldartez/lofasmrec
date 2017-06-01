@@ -21,8 +21,7 @@
 #include "gzstream.h"
 
 #include "lfrec.h"
-#include "fhdrv3.h"
-//#include "fhdrv4.h"
+#include "fhdr.h"
 #include "mjd.h"
 #include "err.h"
 #include "cfg.h"
@@ -56,7 +55,7 @@ void record_timed(float recdur, Configuration cfg)
     string dataroot = cfg.dataroot;
     int station_id = cfg.station_id;
     bool hdr_on = cfg.hdr_on;
-    bool hdr_version = cfg.hdr_version;
+    int hdr_version = cfg.hdr_version;
 
     //int sock, nblk, btotal;
     int sock, Nblocks, samp_len, nblk, ntotal;
@@ -64,7 +63,7 @@ void record_timed(float recdur, Configuration cfg)
     int Npkts; // network packets in each block
     ssize_t n;
     char lfhdr[109];
-    char fname[23];
+    char fname[30];
     char buf[8192]; // buffer to hold socket data
     int Npkts_lastblock; // placeholder for number of packets in the last block
     int recdur_lastblock; //placeholder for duration (in seconds) of last block
@@ -78,6 +77,14 @@ void record_timed(float recdur, Configuration cfg)
     time_t t;
     float tsamp; // filterbank sampling time
 
+    int HDRLENGTH;
+    if (hdr_version == 3){
+        HDRLENGTH = 108;
+    }
+    else {
+        HDRLENGTH = 96;
+    }
+
     // convert dataroot into char array
     std::vector<char> fp(dataroot.size()+50);
     std::strcpy(&fp[0], dataroot.c_str());
@@ -86,11 +93,13 @@ void record_timed(float recdur, Configuration cfg)
     Observation obs = Observation(recdur, cfg);
     Nblocks = obs.Nblocks;
     Npkts = obs.Npkts;
+    Nsamp = Npkts / 17; 
     Npkts_lastblock = obs.Npkts_lastblock;
 
 
     // create inet socket
-    sock = socket(PF_INET, SOCK_DGRAM, 0);
+    //sock = socket(PF_INET, SOCK_DGRAM, 0);
+    sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0) {
         perror("Opening socket");
         exit(0);
@@ -104,13 +113,23 @@ void record_timed(float recdur, Configuration cfg)
     server.sin_port = htons(port);
 
     // bind to socket address and port
-    if (bind(sock,(struct sockaddr *)&server, addr_length)<0) {
+    int bind_res = bind(sock, (struct sockaddr *)&server, addr_length);
+    if (bind_res == -1) {
         cout << "socket addr: " << ip_addr << endl;
         cout << "socket port: " << port << endl;
         perror("error: binding");
         exit(0);
     }
-    else cout << "binding successful\n";
+    else
+    {
+        cout << "bind exit code: " << bind_res << endl;
+        cout << "socket addr: " << ip_addr << endl;
+        cout << "socket port: " << port << endl;
+        cout << "binding successful\n";
+        cout << "N blocks: " << Nblocks << endl;
+        cout << "N Pkts per block: " << Npkts << endl;
+        cout << "N samples per block: " << Nsamp << endl;
+    }
 
     ntotal = 0; // total number of bytes received from socket
     for (int i=0; i<Nblocks; i++) // block loop
@@ -121,9 +140,10 @@ void record_timed(float recdur, Configuration cfg)
         if (i == Nblocks-1 && Npkts_lastblock)
         {
             Npkts = Npkts_lastblock;
+            Nsamp = Npkts/17;
         }
 
-        t = construct_filename(fname); // load filename into fname and corresponding time_t into t
+        t = construct_filename(fname, cfg); // load filename into fname and corresponding time_t into t
 
         strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
 
@@ -131,32 +151,22 @@ void record_timed(float recdur, Configuration cfg)
 
 
         // open output file
-        //std::ofstream ofile (fpath, std::ofstream::binary);
-        ogzstream ofile(fpath);
+        std::ofstream ofile (fpath, std::ofstream::binary);
+        //ogzstream ofile(fpath);
+
+        if (!ofile.is_open())
+        {
+            error("unable to open file.");
+        }
 
 
         if (hdr_on)
         {
-            if (hdr_version == 3)
-            {
-                construct_hdrV3(lfhdr, t, station_id);  // load header into lfhdr
-            }
-            /*
-            else if (hdr_version == 4)
-            {
-                construct_hdrV4(lfhdr, t, station_id, Npkts);     // load header into lfhdr
-
-            }
-            */
-            else
-            {
-                error("header version unrecognized");
-            }
+            constructFileHeader(lfhdr, t, hdr_version, station_id, Nsamp);
 
             // write file header
             ofile.write(lfhdr, HDRLENGTH);
         }
-
 
         for (int k=0; k<Npkts; k++)
         { // packet loop
@@ -168,6 +178,7 @@ void record_timed(float recdur, Configuration cfg)
                 exit(1);
             }
             ofile.write(buf, n);
+            //ofile << buf;
             nblk += n;
         }
 
@@ -177,7 +188,7 @@ void record_timed(float recdur, Configuration cfg)
 }
 
 
-time_t construct_filename(char *fname)
+time_t construct_filename(char *fname, Configuration cfg)
 {
 /*
     Construct LoFASM data file name using current date.
@@ -187,6 +198,7 @@ time_t construct_filename(char *fname)
 
     time_t t = std::time(nullptr);
     tm *gm = std::gmtime(&t);
+    int ind;
 
     fmt_char_val(fname, 1900+gm->tm_year, 0, (size_t) 4);
     fmt_char_val(fname, 1+gm->tm_mon, 4 , (size_t) 2);
@@ -195,7 +207,19 @@ time_t construct_filename(char *fname)
     fmt_char_val(fname, gm->tm_hour, 9, (size_t) 2);
     fmt_char_val(fname, gm->tm_min, 11, (size_t) 2);
     fmt_char_val(fname, gm->tm_sec, 13, (size_t) 2);
-    strcpy(fname+15, ".lofasm.gz");
+    //strcpy(fname+15, ".lofasm.gz");
+
+    if (cfg.rec_mode == 1)
+    {
+        strncpy(fname+15, "_", (size_t) 1);
+        strncpy(fname+16, std::to_string(cfg.bbr_id).c_str(), (size_t) 1);
+        strcpy(fname+17, ".bbr");
+    }
+    else if (cfg.rec_mode == 2)
+    {
+        strcpy(fname+15, ".lofasm");
+    }
+
     return t;
 }
 

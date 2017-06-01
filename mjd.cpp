@@ -1,6 +1,10 @@
 #include "mjd.h"
+#include <string>
 
-void mjd(double *mjdbuf, time_t t)
+
+
+
+void mjd(mjd_t *m, time_t t)
 {
 
     /*
@@ -19,8 +23,10 @@ void mjd(double *mjdbuf, time_t t)
     double days = s/86400.0;
     double nowmjd = MJD1970 + days;
 
-    mjdbuf[0] = (int) nowmjd; // integer mjd days
-    mjdbuf[1] = (nowmjd - mjdbuf[0]) * msec_day; // number of milliseconds since midnight
+    //mjdbuf[0] = (int) nowmjd; // integer mjd days
+    //mjdbuf[1] = (nowmjd - mjdbuf[0]) * msec_day; // number of milliseconds since midnight
+    m->days = (int) nowmjd; // integer mjd days
+    m->ms = (nowmjd - m->days) * msec_day; // number of milliseconds since midnight
 
 
 }

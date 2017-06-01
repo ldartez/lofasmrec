@@ -9,7 +9,7 @@
 
 
 void record_timed(float, Configuration);
-time_t construct_filename(char *);
+time_t construct_filename(char *, Configuration);
 void fmt_char_val(char*, int, int, size_t);
 
 #endif //PACKET_SNIFFER_LFREC_H

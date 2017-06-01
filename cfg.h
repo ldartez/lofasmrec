@@ -27,10 +27,13 @@ class Configuration
 public:
     std::string pidfile, dataroot, roach_ip, roach_ip_10gbe, incoming_ip_10gbe;
     int blocktime, station_id, roach_port, roach_port_10gbe;
-    bool hdr_on, hdr_version;
+    bool hdr_on;
+    int hdr_version, rec_mode;
     int incoming_port_10gbe, n;
     int samp_len;
     float tsamp;
+    int hdrlength;
+    int blocksize, bbr_id;
 
     Configuration(const char *);
 
