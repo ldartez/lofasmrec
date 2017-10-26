@@ -147,7 +147,8 @@ void record_timed(float recdur, Configuration cfg)
 
         strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
 
-        cout << "new file: " << fpath << endl;
+        cout << i+1 << "/" << Nblocks << ": ";
+        cout << fpath << endl;
 
 
         // open output file
