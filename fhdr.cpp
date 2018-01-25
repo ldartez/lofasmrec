@@ -34,8 +34,8 @@ void constructFileHeader(char *buf, time_t t, int header_version, int station_id
     char mjdms[9] = "        ";
     char station[9] = "        ";
     char nsamples[9] = "        ";
-    char hlen[9] = "        ";
-    char hver[9] = "        ";
+    char hlen[9] = "        "; // length of header string in bytes
+    char hver[9] = "        "; // header version
     int offset, offset_len, offset_ver;
     std::string hdrlen, hdrver;
 
@@ -44,7 +44,7 @@ void constructFileHeader(char *buf, time_t t, int header_version, int station_id
     mjd(m, t);
 
     // convert values to strings
-    std::string day = std::to_string((int) m->days); // this will be 5 characters long for many years
+    std::string day = std::to_string((int) m->days);
     std::string ms = std::to_string(m->ms);
     std::string station_str = std::to_string(station_id);
     std::string nsamp_str = std::to_string(Nsamp);
