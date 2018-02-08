@@ -97,6 +97,14 @@ Configuration::Configuration(const char *infile)
             else if (hdr_version == 4){
                 hdrlength = 96;
             }
+	    else if (hdr_version == 5){
+		hdrlength = 128;
+	    }
+	    else{
+		hdrlength = 0; // header version not supported
+		std::cout << "Header Version: " << hdr_version;
+		std::cout << " not supported!\n";
+	    }
         }
         else if (field.name == "rec_mode")
         {
@@ -110,6 +118,22 @@ Configuration::Configuration(const char *infile)
         {
             bbr_id = std::stoi(field.value);
         }
+	else if (field.name == "trunkA")
+	{
+	    trunkA = field.value;
+	}
+	else if (field.name == "trunkB")
+	{
+	    trunkB = field.value;
+	}
+	else if (field.name == "trunkC")
+	{
+	    trunkC = field.value;
+	}
+	else if (field.name == "trunkD")
+	{
+	    trunkD = field.value;
+	}
     }
 }
 

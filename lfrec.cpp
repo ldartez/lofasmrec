@@ -1,3 +1,4 @@
+
 //
 // Created by Louis Dartez on 3/5/17.
 //
@@ -18,7 +19,7 @@
 #include <arpa/inet.h>
 #include <fstream>
 #include <vector>
-#include "gzstream.h"
+#include <gzstream.h>
 
 #include "lfrec.h"
 #include "fhdr.h"
@@ -39,7 +40,7 @@ using std::string;
 
 void record_timed(float recdur, Configuration cfg)
 {
-/*
+    /*
     Record data for a specified amount of time before exiting.
 
     Parameters
@@ -57,12 +58,11 @@ void record_timed(float recdur, Configuration cfg)
     bool hdr_on = cfg.hdr_on;
     int hdr_version = cfg.hdr_version;
 
-    //int sock, nblk, btotal;
     int sock, Nblocks, samp_len, nblk, ntotal;
     int Nsamp; // filterbank samples in each block
     int Npkts; // network packets in each block
     ssize_t n;
-    char lfhdr[109];
+    string lfhdr;
     char fname[30];
     char buf[8192]; // buffer to hold socket data
     int Npkts_lastblock; // placeholder for number of packets in the last block
@@ -79,11 +79,22 @@ void record_timed(float recdur, Configuration cfg)
 
     int HDRLENGTH;
     if (hdr_version == 3){
-        HDRLENGTH = 108;
+        HDRLENGTH = HDRV3_LENGTH;
     }
-    else {
-        HDRLENGTH = 96;
+    else if (hdr_version == 4)
+    {
+        HDRLENGTH = HDRV4_LENGTH;
     }
+    else if (hdr_version == 5)
+    {
+	HDRLENGTH = HDRV5_LENGTH;
+    }
+    else
+    {
+	cout << "Error: header version not recognized.\n";
+	exit(1);
+    }
+    
 
     // convert dataroot into char array
     std::vector<char> fp(dataroot.size()+50);
@@ -107,7 +118,10 @@ void record_timed(float recdur, Configuration cfg)
     else cout << "socket opened.\n";
 
     addr_length = sizeof(server);
-    memset(&server, 0, addr_length); // initialize with zeros..not sure why we have to do this but it won't work otherwise
+
+    // initialize with zeros..not sure why we have to do
+    // this but it won't work otherwise
+    memset(&server, 0, addr_length);
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr(ip_addr);
     server.sin_port = htons(port);
@@ -143,7 +157,8 @@ void record_timed(float recdur, Configuration cfg)
             Nsamp = Npkts/17;
         }
 
-        t = construct_filename(fname, cfg); // load filename into fname and corresponding time_t into t
+	// load filename into fname and corresponding time_t into t
+        t = construct_filename(fname, cfg);
 
         strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
 
@@ -152,10 +167,10 @@ void record_timed(float recdur, Configuration cfg)
 
 
         // open output file
-        std::ofstream ofile (fpath, std::ofstream::binary);
-        //ogzstream ofile(fpath);
+        //std::ofstream ofile (fpath, std::ofstream::binary);
+        ogzstream ofile(fpath);
 
-        if (!ofile.is_open())
+        if (!ofile.good())
         {
             error("unable to open file.");
         }
@@ -163,10 +178,11 @@ void record_timed(float recdur, Configuration cfg)
 
         if (hdr_on)
         {
-            constructFileHeader(lfhdr, t, hdr_version, station_id, Nsamp);
+            constructFileHeader(&lfhdr, t, cfg, Nsamp);
 
             // write file header
-            ofile.write(lfhdr, HDRLENGTH);
+            //ofile.write(lfhdr.c_str(), HDRLENGTH);
+	    ofile << lfhdr;
         }
 
         for (int k=0; k<Npkts; k++)
@@ -178,8 +194,8 @@ void record_timed(float recdur, Configuration cfg)
                 ofile.close();
                 exit(1);
             }
-            ofile.write(buf, n);
-            //ofile << buf;
+            //ofile.write(buf, n);
+            ofile << buf;
             nblk += n;
         }
 
@@ -218,7 +234,7 @@ time_t construct_filename(char *fname, Configuration cfg)
     }
     else if (cfg.rec_mode == 2)
     {
-        strcpy(fname+15, ".lofasm");
+        strcpy(fname+15, ".lofasm.gz");
     }
 
     return t;

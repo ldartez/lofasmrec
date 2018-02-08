@@ -27,6 +27,4 @@ void mjd(mjd_t *m, time_t t)
     //mjdbuf[1] = (nowmjd - mjdbuf[0]) * msec_day; // number of milliseconds since midnight
     m->days = (int) nowmjd; // integer mjd days
     m->ms = (nowmjd - m->days) * msec_day; // number of milliseconds since midnight
-
-
 }

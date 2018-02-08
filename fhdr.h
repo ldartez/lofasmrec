@@ -14,7 +14,10 @@
 #include <ctime>
 #endif
 
-const unsigned int HDRENTRYLEN = 8;
+#include "cfg.h"
+#include <string>
+
+const size_t HDRENTRYLEN = 8;
 const char HDRSIG[HDRENTRYLEN+1] = "    LoCo";
 const char HDRNBINS[HDRENTRYLEN+1] = "    2048";
 const char HDRFSTART[HDRENTRYLEN+1] = "       0";
@@ -24,7 +27,8 @@ const char HDRFMTVER[HDRENTRYLEN+1] = "       1";
 
 const unsigned int HDRV3_LENGTH = 108;
 const unsigned int HDRV4_LENGTH = 96;
+const unsigned int HDRV5_LENGTH = 128;
 
-void constructFileHeader(char *, time_t, int, int, int);
-
-#endif //PACKET_SNIFFER_FHDRV3_H
+void constructFileHeader(std::string *, time_t, Configuration, int);
+void formatHeaderEntry(std::string&);
+#endif //PACKET_SNIFFER_FHDR_H

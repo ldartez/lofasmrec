@@ -24,17 +24,24 @@ Observation::Observation(int recdur, Configuration cfg)
 
 
              // calculate number of blocks (files)
-            if (recdur*8192 < cfg.blocksize || recdur == cfg.blocksize) // total duration is less than default blocktime
+
+	    // total duration is less than default blocktime
+            if (recdur*8192 < cfg.blocksize || recdur == cfg.blocksize)
             {
                 cfg.blocksize = recdur*8192;
                 Nblocks = 1;
             }
-            else if (fmod(duration,cfg.blocksize) == 0) // total duration is exact multiple of default blocktime
+	    
+	    // total duration is exact multiple of default blocktime
+            else if (fmod(duration,cfg.blocksize) == 0)
             {
                 //Nblocks = (int) duration/cfg.blocksize;
                 ;
             }
-            else // total duration is not a multiple of default blocksize. the last block will only contain the leftover data.
+
+	    // total duration is not a multiple of default blocksize.
+	    //the last block will only contain the leftover data.
+            else
             {
                 //Nblocks = (int) duration/cfg.blocksize;
                 recdur_lastblock = fmod(duration,cfg.blocksize);
@@ -52,24 +59,32 @@ Observation::Observation(int recdur, Configuration cfg)
         {
 
             // calculate number of blocks (files)
-            if (recdur < blocktime || recdur == blocktime) // total duration is less than default blocktime
+	  
+	    // total duration is less than default blocktime
+            if (recdur < blocktime || recdur == blocktime)
             {
                 blocktime = duration;
                 Nblocks = 1;
             }
-            else if (fmod(duration,blocktime) == 0) // total duration is exact multiple of default blocktime
+	    
+	    // total duration is exact multiple of default blocktime
+            else if (fmod(duration,blocktime) == 0)
             {
                 Nblocks = (int) duration/blocktime;
             }
-            else // total duration is not a multiple of default blocktime. the last block will only contain the leftover data.
+
+	    // total duration is not a multiple of default blocktime.
+	    //the last block will only contain the leftover data.
+            else
             {
                 Nblocks = (int) duration/blocktime;
                 recdur_lastblock = fmod(duration,blocktime);
-                Npkts_lastblock = ((int) floor(recdur_lastblock / tsamp) + 1) * 17;
+                Npkts_lastblock = ((int) floor(recdur_lastblock/tsamp) + 1) * 17;
             }
 
             //calculate number of samples per block
-            Nsamp = ((unsigned int) floor(blocktime / tsamp) + 1); // always get just one extra sample
+	    // always get just one extra sample
+            Nsamp = ((unsigned int) floor(blocktime / tsamp) + 1);
 
             Npkts = Nsamp * 17; // total number of UDP packets per block
 

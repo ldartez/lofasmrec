@@ -20,7 +20,9 @@ main.o : main.cpp fhdr.h lfrec.h cfg.h err.h
 		$(CC) $(DBGFLAG) $(CFLAGS) -c main.cpp
 mjd.o : mjd.cpp mjd.h
 		$(CC) $(DBGFLAG) $(CFLAGS) -c mjd.cpp
-obs.o: obs.cpp obs.h cfg.h
+obs.o : obs.cpp obs.h cfg.h
 		$(CC) $(DBGFLAG) $(CFLAGS) -c obs.cpp
 clean :
 		rm lofasmrec $(objects)
+cfgtest : all
+	./lofasmrec -c default/lofasm.cfg -l 86400;

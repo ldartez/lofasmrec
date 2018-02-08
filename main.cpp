@@ -13,7 +13,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <arpa/inet.h>
-
+#include <string>
 #ifndef IOSTREAM_INCLUDE_GUARD
 #define IOSTREAM_INCLUDE_GUARD
 #include <iostream>
@@ -45,10 +45,10 @@
 #include "err.h"    // functions to print error messages
 #include "obs.h"
 
-
-using std::cout;
-using std::endl;
-using std::vector;
+using namespace std;
+//using std::cout;
+//using std::endl;
+//using std::vector;
 
 // function prototypes
 void error(const char*);
@@ -71,11 +71,10 @@ int main(int argc, char *argv[]) {
     Configuration* cfg;
 
     // config parameters
-    std::string pidfname, dataroot;
+    string pidfname, dataroot;
     int blocktime;
     int pid = -1;
     int argindex;
-
 
     opterr = 0;
 
@@ -84,7 +83,8 @@ int main(int argc, char *argv[]) {
         Command line options
 
         t: number of seconds to record for
-        c: specify configuration file to read. if not provided then default is used.
+        c: specify configuration file to read. 
+	    if not provided then default is used.
     */
     while ((c = getopt(argc, argv, "c:hl")) != -1)
     {
@@ -93,9 +93,11 @@ int main(int argc, char *argv[]) {
 
             case 'c':
             {
-                std::cout << "Using config file: " << (std::string) optarg << std::endl;
+                cout << "Using config file: " << (string) optarg;
+		cout << endl;
                 usercfg = true;
                 cfg = new Configuration(optarg);
+
                 break;
             }
 
@@ -139,8 +141,9 @@ int main(int argc, char *argv[]) {
     {
 
          const char *cfg_path = "/home/controller/.lofasm/lofasm.cfg";
-        cout << "\nUsing default configuration file: /home/controller/.lofasm/lofasm.cfg\n";
-        cfg = new Configuration(cfg_path);
+	 cout << "\nUsing default configuration file: ";
+	 cout << "/home/controller/.lofasm/lofasm.cfg\n";
+	 cfg = new Configuration(cfg_path);
 
     }
 
@@ -148,7 +151,7 @@ int main(int argc, char *argv[]) {
     // set tin if found in command line, else print usage and exit
     if (optind == argc-1)
     {
-        tin = std::atof(argv[optind]);
+        tin = atof(argv[optind]);
     }
     else
     {
@@ -162,6 +165,15 @@ int main(int argc, char *argv[]) {
         print_summary(tin, *cfg);
         Observation *obs = new Observation(tin, *cfg);
         obs->print();
+
+	// print mock file header
+	char fname[30];
+	string hdr;
+	int Nsamp = obs->Npkts / 17;
+	time_t t = construct_filename(fname, *cfg);
+	constructFileHeader(&hdr, t, *cfg, Nsamp);
+	cout << "::Begin Mock File Header::\n";
+	cout << hdr << endl << "::END::\n";
 
         exit(0);
     }
