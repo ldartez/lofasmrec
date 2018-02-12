@@ -163,7 +163,7 @@ void record_timed(float recdur, Configuration cfg)
 
         // get filename in format YYYYMMDD_HHMMSS.<extension>
         fname = construct_filename(t, cfg);
-        date_dirname = fname.substr(0, 15);
+        date_dirname = fname.substr(0, 8);
         //strncpy(fpath+dataroot.size(), fname.c_str(), fp.size()-dataroot.size());
 
         // check if date_dirname already exists
