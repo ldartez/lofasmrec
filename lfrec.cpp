@@ -16,6 +16,7 @@
 #endif
 
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <fstream>
 #include <vector>
@@ -62,10 +63,12 @@ void record_timed(float recdur, Configuration cfg)
     ssize_t n;
     string lfhdr;
     string fname;
+    string date_dirname;
     char buf[8192]; // buffer to hold socket data
     int Npkts_lastblock; // placeholder for number of packets in the last block
     int recdur_lastblock; //placeholder for duration (in seconds) of last block
-
+    struct stat statbuf; // buffer for file stats
+    int statcode; // return code from stat()
     socklen_t addr_length;
     struct sockaddr_in server;
 
@@ -95,14 +98,15 @@ void record_timed(float recdur, Configuration cfg)
 
 
     // convert dataroot into char array
-    std::vector<char> fp(dataroot.size()+50);
-    std::strcpy(&fp[0], dataroot.c_str());
-    char *fpath = &fp[0];
+    //std::vector<char> fp(dataroot.size()+50);
+    //std::strcpy(&fp[0], dataroot.c_str());
+    //char *fpath = &fp[0];
+    string fpath;
 
     Observation obs = Observation(recdur, cfg);
     Nblocks = obs.Nblocks;
     Npkts = obs.Npkts;
-    Nsamp = Npkts / 17; 
+    Nsamp = Npkts / 17;
     Npkts_lastblock = obs.Npkts_lastblock;
 
 
@@ -154,18 +158,36 @@ void record_timed(float recdur, Configuration cfg)
             Nsamp = Npkts/17;
         }
 
-        // load filename into fname and corresponding time_t into t
+        // create filename
         t = time(nullptr);
+
+        // get filename in format YYYYMMDD_HHMMSS.<extension>
         fname = construct_filename(t, cfg);
-        cout << "lfred: created fname " << fname << endl;
-        strncpy(fpath+dataroot.size(), fname.c_str(), fp.size()-dataroot.size());
+        date_dirname = fname.substr(0, 15);
+        //strncpy(fpath+dataroot.size(), fname.c_str(), fp.size()-dataroot.size());
+
+        // check if date_dirname already exists
+        fpath = dataroot + date_dirname;
+        statcode = stat(fpath.c_str(), &statbuf);
+
+        // if directory doesn't exist then create it.
+        // NOTE: I'm not checking if the directory path points
+        // to a regular file. I don't expect that to ever happen.
+        if (statcode == -1)
+            {
+                mkdir(fpath.c_str(), (mode_t) 777);
+            }
+
+        // append filename to filepath.
+        fpath += "/";
+        fpath += fname;
 
         cout << i+1 << "/" << Nblocks << ": ";
         cout << fpath << endl;
 
 
         // open output file
-        ogzstream ofile (fpath);
+        ogzstream ofile (fpath.c_str());
 
         // validate file opening
         if (!ofile.good())
