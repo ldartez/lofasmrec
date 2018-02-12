@@ -187,7 +187,7 @@ void record_timed(float recdur, Configuration cfg)
 
 
         // open output file
-        ogzstream ofile (fpath.c_str());
+        ogzstream ofile (fpath.c_str(), ios::out | ios::binary);
 
         // validate file opening
         if (!ofile.good())
@@ -198,8 +198,9 @@ void record_timed(float recdur, Configuration cfg)
         if (hdr_on)
         {
             constructFileHeader(&lfhdr, t, cfg, Nsamp);
-            ofile << lfhdr;
+            ofile << lfhdr; // write formatted ascii header
         }
+
 
         // packet loop
         for (int k=0; k<Npkts; k++)
@@ -211,8 +212,8 @@ void record_timed(float recdur, Configuration cfg)
                         ofile.close();
                         exit(1);
                     }
-                ofile << buf;
-                nblk += n;
+                 ofile.write(buf, (size_t) n);
+                 nblk += n;
             }
 
         ntotal += nblk;
