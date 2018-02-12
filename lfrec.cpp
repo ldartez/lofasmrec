@@ -175,7 +175,7 @@ void record_timed(float recdur, Configuration cfg)
         // to a regular file. I don't expect that to ever happen.
         if (statcode == -1)
             {
-                mkdir(fpath.c_str(), (mode_t) 777);
+                mkdir(fpath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
             }
 
         // append filename to filepath.
