@@ -6,10 +6,11 @@
 #define PACKET_SNIFFER_LFREC_H
 
 #include "cfg.h"
-
+#include <ctime>
+#include <string>
 
 void record_timed(float, Configuration);
-time_t construct_filename(char *, Configuration);
-void fmt_char_val(char*, int, int, size_t);
+std::string construct_filename(time_t, Configuration);
+std::string fmt_val(int, size_t);
 
 #endif //PACKET_SNIFFER_LFREC_H

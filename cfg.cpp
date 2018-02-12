@@ -86,7 +86,7 @@ Configuration::Configuration(const char *infile)
         }
         else if (field.name == "hdr_on")
         {
-            hdr_on = std::stoi(field.value);
+            hdr_on = (bool) std::stoi(field.value);
         }
         else if (field.name == "hdr_version")
         {
@@ -97,14 +97,15 @@ Configuration::Configuration(const char *infile)
             else if (hdr_version == 4){
                 hdrlength = 96;
             }
-	    else if (hdr_version == 5){
-		hdrlength = 128;
-	    }
-	    else{
-		hdrlength = 0; // header version not supported
-		std::cout << "Header Version: " << hdr_version;
-		std::cout << " not supported!\n";
-	    }
+            else if (hdr_version == 5){
+                hdrlength = 128;
+            }
+            else
+            {
+                hdrlength = 0; // header version not supported
+                std::cout << "Header Version: " << hdr_version;
+                std::cout << " not supported!\n";
+            }
         }
         else if (field.name == "rec_mode")
         {
@@ -112,30 +113,31 @@ Configuration::Configuration(const char *infile)
         }
         else if (field.name == "blocksize")
         {
-            blocksize = std::stoi(field.value); // max size of each file in bytes
+            // max size of each file in bytes
+            blocksize = std::stoi(field.value);
         }
         else if (field.name == "bbr_id")
         {
             bbr_id = std::stoi(field.value);
         }
-	else if (field.name == "trunkA")
-	{
-	    trunkA = field.value;
-	}
-	else if (field.name == "trunkB")
-	{
-	    trunkB = field.value;
-	}
-	else if (field.name == "trunkC")
-	{
-	    trunkC = field.value;
-	}
-	else if (field.name == "trunkD")
-	{
-	    trunkD = field.value;
-	}
-    }
-}
+        else if (field.name == "trunkA")
+            {
+                trunkA = field.value;
+            }
+        else if (field.name == "trunkB")
+            {
+                trunkB = field.value;
+            }
+        else if (field.name == "trunkC")
+            {
+                trunkC = field.value;
+            }
+        else if (field.name == "trunkD")
+            {
+                trunkD = field.value;
+            }
+    } // end for loop
+} // end Configuration definition
 
 
 int Configuration::readcfg() {

@@ -161,22 +161,23 @@ int main(int argc, char *argv[]) {
 
     // print observation summary for debugging
     if (printSummary)
-    {
-        print_summary(tin, *cfg);
-        Observation *obs = new Observation(tin, *cfg);
-        obs->print();
+        {
+            print_summary(tin, *cfg);
+            Observation *obs = new Observation(tin, *cfg);
+            obs->print();
 
-	// print mock file header
-	char fname[30];
-	string hdr;
-	int Nsamp = obs->Npkts / 17;
-	time_t t = construct_filename(fname, *cfg);
-	constructFileHeader(&hdr, t, *cfg, Nsamp);
-	cout << "::Begin Mock File Header::\n";
-	cout << hdr << endl << "::END::\n";
+            // print mock file header
+            string hdr;
+            int Nsamp = obs->Npkts / 17;
+            time_t t = time(nullptr);
+            string fname = construct_filename(t, *cfg);
 
-        exit(0);
-    }
+            constructFileHeader(&hdr, t, *cfg, Nsamp);
+            cout << "::Begin Mock File Header::\n";
+            cout << hdr << endl << "::END::\n";
+
+            exit(0);
+        }
 
     record_timed(tin, *cfg);
     exit(0);

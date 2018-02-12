@@ -109,36 +109,36 @@ void constructFileHeader(std::string *buf, time_t t, Configuration cfg, int Nsam
     buf->append(mjdms);
     buf->append(HDRINTTIME);
     buf->append(HDRFMTVER);
-    
-    if (header_version == 3){
-	// last two fields are 10 bytes long
-	buf->append("          ");
-	buf->append("          ");
-    }
-    else if (header_version == 4){
-	buf->append(nsamples);
-    }
-    else if (header_version == 5)
-    {
-	buf->append(nsamples);
-	
-	// write trunk line labels.
-	std::string trunkLabel;
-	trunkLabel = cfg.trunkA;
-	formatHeaderEntry(trunkLabel);
-	buf->append(trunkLabel.c_str());
-	trunkLabel = cfg.trunkB;
-	formatHeaderEntry(trunkLabel);
-	buf->append(trunkLabel.c_str());
-	trunkLabel = cfg.trunkC;
-	formatHeaderEntry(trunkLabel);
-	buf->append(trunkLabel.c_str());
-	trunkLabel = cfg.trunkD;
-	formatHeaderEntry(trunkLabel);
-	buf->append(trunkLabel.c_str());
-	
 
-    }
+    if (header_version == 3)
+        {
+            // last two fields are 10 bytes long
+            buf->append("          ");
+            buf->append("          ");
+        }
+    else if (header_version == 4)
+        {
+            buf->append(nsamples);
+        }
+    else if (header_version == 5)
+        {
+            buf->append(nsamples);
+
+            // write trunk line labels.
+            std::string trunkLabel;
+            trunkLabel = cfg.trunkA;
+            formatHeaderEntry(trunkLabel);
+            buf->append(trunkLabel.c_str());
+            trunkLabel = cfg.trunkB;
+            formatHeaderEntry(trunkLabel);
+            buf->append(trunkLabel.c_str());
+            trunkLabel = cfg.trunkC;
+            formatHeaderEntry(trunkLabel);
+            buf->append(trunkLabel.c_str());
+            trunkLabel = cfg.trunkD;
+            formatHeaderEntry(trunkLabel);
+            buf->append(trunkLabel.c_str());
+        }
     else {
         error("unrecognized header format");
     }
@@ -155,16 +155,16 @@ void formatHeaderEntry(std::string &buf)
     // then truncate.
     size_t l = buf.length();
     if (l > HDRENTRYLEN)
-	l = HDRENTRYLEN;
-    
+        l = HDRENTRYLEN;
+
     std::string *tmp = new std::string();
 
     // copy characters to tmp
     for (int i=0; i<l; i++)
-    {
-	*tmp += buf[i];
-    }
-    
+        {
+            *tmp += buf[i];
+        }
+
     buf.clear();
     buf.insert(buf.begin(), HDRENTRYLEN-tmp->length(), ' ');
     buf += *tmp;

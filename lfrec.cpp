@@ -29,9 +29,7 @@
 #include "obs.h"
 
 
-using std::cout;
-using std::endl;
-using std::string;
+using namespace std;
 
 
 // Class Definition
@@ -63,7 +61,7 @@ void record_timed(float recdur, Configuration cfg)
     int Npkts; // network packets in each block
     ssize_t n;
     string lfhdr;
-    char fname[30];
+    string fname;
     char buf[8192]; // buffer to hold socket data
     int Npkts_lastblock; // placeholder for number of packets in the last block
     int recdur_lastblock; //placeholder for duration (in seconds) of last block
@@ -74,7 +72,7 @@ void record_timed(float recdur, Configuration cfg)
     in_port_t port = (in_port_t) port_in;
     const char *ip_addr = ipaddr_in.c_str();
 
-    time_t t;
+    time_t t; // timestamp for beginning of current file
     float tsamp; // filterbank sampling time
 
     int HDRLENGTH;
@@ -87,14 +85,14 @@ void record_timed(float recdur, Configuration cfg)
     }
     else if (hdr_version == 5)
     {
-	HDRLENGTH = HDRV5_LENGTH;
+        HDRLENGTH = HDRV5_LENGTH;
     }
     else
     {
-	cout << "Error: header version not recognized.\n";
-	exit(1);
+        cout << "Error: header version not recognized.\n";
+        exit(1);
     }
-    
+
 
     // convert dataroot into char array
     std::vector<char> fp(dataroot.size()+50);
@@ -109,7 +107,6 @@ void record_timed(float recdur, Configuration cfg)
 
 
     // create inet socket
-    //sock = socket(PF_INET, SOCK_DGRAM, 0);
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0) {
         perror("Opening socket");
@@ -157,114 +154,117 @@ void record_timed(float recdur, Configuration cfg)
             Nsamp = Npkts/17;
         }
 
-	// load filename into fname and corresponding time_t into t
-        t = construct_filename(fname, cfg);
-
-        strncpy(fpath+dataroot.size(), fname, fp.size()-dataroot.size());
+        // load filename into fname and corresponding time_t into t
+        t = time(nullptr);
+        fname = construct_filename(t, cfg);
+        cout << "lfred: created fname " << fname << endl;
+        strncpy(fpath+dataroot.size(), fname.c_str(), fp.size()-dataroot.size());
 
         cout << i+1 << "/" << Nblocks << ": ";
         cout << fpath << endl;
 
 
         // open output file
-        //std::ofstream ofile (fpath, std::ofstream::binary);
-        ogzstream ofile(fpath);
+        ogzstream ofile (fpath);
 
+        // validate file opening
         if (!ofile.good())
         {
             error("unable to open file.");
         }
 
-
         if (hdr_on)
         {
             constructFileHeader(&lfhdr, t, cfg, Nsamp);
-
-            // write file header
-            //ofile.write(lfhdr.c_str(), HDRLENGTH);
-	    ofile << lfhdr;
+            ofile << lfhdr;
         }
 
+        // packet loop
         for (int k=0; k<Npkts; k++)
-        { // packet loop
-            n = recv(sock, buf, 8192, 0);
-            if (n<0)
             {
-                std::cout << "error: recv\n";
-                ofile.close();
-                exit(1);
+                n = recv(sock, buf, 8192, 0);
+                if (n<0)
+                    {
+                        std::cout << "error: recv\n";
+                        ofile.close();
+                        exit(1);
+                    }
+                ofile << buf;
+                nblk += n;
             }
-            //ofile.write(buf, n);
-            ofile << buf;
-            nblk += n;
-        }
 
         ntotal += nblk;
         ofile.close();
     }
 }
 
-
-time_t construct_filename(char *fname, Configuration cfg)
+string construct_filename(time_t t, Configuration cfg)
 {
 /*
     Construct LoFASM data file name using current date.
     Filename is stored in fname as a character array.
     The current time is returned as a time_t object.
 */
+    string fname;
+    fname.reserve(30);
+    tm *gm = gmtime(&t);
+    fname += fmt_val((int) 1900+gm->tm_year, 4);
+    fname += fmt_val((int) 1+gm->tm_mon, 2);
+    fname += fmt_val((int) gm->tm_mday, 2);
+    fname += "_";
+    fname += fmt_val((int) gm->tm_hour, 2);
+    fname += fmt_val((int) gm->tm_min, 2);
+    fname += fmt_val((int) gm->tm_sec, 2);
 
-    time_t t = std::time(nullptr);
-    tm *gm = std::gmtime(&t);
-    int ind;
+    if (cfg.rec_mode == 1) // bbr mode
+        {
+            fname += "_";
+            fname += to_string(cfg.bbr_id);
+            fname += ".bbr";
+        }
+    else if (cfg.rec_mode == 2) // spectrometer mode
+        {
+            fname += ".lofasm";
+        }
 
-    fmt_char_val(fname, 1900+gm->tm_year, 0, (size_t) 4);
-    fmt_char_val(fname, 1+gm->tm_mon, 4 , (size_t) 2);
-    fmt_char_val(fname, gm->tm_mday, 6, (size_t) 2);
-    strncpy(fname+8, "_", (size_t) 1);
-    fmt_char_val(fname, gm->tm_hour, 9, (size_t) 2);
-    fmt_char_val(fname, gm->tm_min, 11, (size_t) 2);
-    fmt_char_val(fname, gm->tm_sec, 13, (size_t) 2);
-    //strcpy(fname+15, ".lofasm.gz");
+    fname += ".gz";
 
-    if (cfg.rec_mode == 1)
-    {
-        strncpy(fname+15, "_", (size_t) 1);
-        strncpy(fname+16, std::to_string(cfg.bbr_id).c_str(), (size_t) 1);
-        strcpy(fname+17, ".bbr");
-    }
-    else if (cfg.rec_mode == 2)
-    {
-        strcpy(fname+15, ".lofasm.gz");
-    }
-
-    return t;
+    return fname;
 }
 
-void fmt_char_val(char *buf, int val, int offset, size_t size)
+string fmt_val(int val, size_t size)
 {
-/*
-    format buf string to have _size_ bytes. If buf is longer than _size_
-    then truncate. Otherwise pad with leading zeros ("0").
-*/
-    std::string sval = std::to_string(val);
-    size_t l, dif;
-    char *bufp = buf+offset;
+    /*
+      format val to be a string with _size_ characters.
+      If val is longer than _size_ then truncate.
+      Otherwise pad with leading zeros ("0").
 
-    l = sval.length();
+      returns a string
+    */
 
-    if (size > l) // zero padding is needed
-    {
-        dif = size - l; // number of leading zeros to pad with
-        strncpy(bufp, "0", dif);
+    string result;
+    string sval = to_string(val);
+    size_t sval_len, ndif;
+    sval_len = sval.length();
 
-    }
-    else
-    {
-        dif = 0;
-    }
+    if (size > sval_len) // zero padding is needed
+        {
+            ndif = size - sval_len; // number of leading zeros to pad with
+            for (int i=0; i<ndif; i++)
+                {
+                    result += "0";
+                }
+            result += sval;
+        }
+    else if (size < sval_len) // sval is too large
+        {
+            // truncate to size
+            result = sval.substr(0, size);
+        }
+    else // sval is exactly the right size
+        {
+            result = sval;
+        }
 
-    bufp += dif;
-
-    strncpy(bufp, std::to_string(val).c_str(), size-dif);
-
+    return result;
 }
