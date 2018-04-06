@@ -199,6 +199,8 @@ void record_timed(float recdur, Configuration cfg)
         {
             constructFileHeader(&lfhdr, t, cfg, Nsamp);
             ofile << lfhdr; // write formatted ascii header
+            ofile.flush();
+            lfhdr.clear();
         }
 
 
