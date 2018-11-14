@@ -185,10 +185,9 @@ int Configuration::readcfg(){
                 fieldval = line.substr(eq_pos+3, line.size());
                 n_fields++;
             }
-
         }
-
     }
+    cout << "end of readcfg: " << __line__ << endl;
     cfg.close();
     return n_fields;
 }
