@@ -187,7 +187,7 @@ int Configuration::readcfg(){
             }
         }
     }
-    cout << "end of readcfg" << endl;
+    std::cout << "end of readcfg" << std::endl;
     cfg.close();
     return n_fields;
 }
