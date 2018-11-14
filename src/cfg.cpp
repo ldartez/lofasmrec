@@ -183,13 +183,13 @@ int Configuration::readcfg(){
             else {
                 fieldname = line.substr(0, eq_pos);
                 fieldval = line.substr(eq_pos+3, line.size());
-                std::cout << ++n_fields << ": ";
-                std::cout << "Processing field: " << fieldname << ": " << fieldval << std::endl;
+                n_fields++;
             }
 
         }
 
     }
+    cfg.close();
     return n_fields;
 }
 
