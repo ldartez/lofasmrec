@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     bool oflag = false; // output directory set
     bool usercfg = false; // user-defined config
     bool printSummary = false;
-    char *outputdir = nullptr;
+    char* outputdir = nullptr;
     float tin;
     int c;
     Configuration* cfg;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
             case 'c':
             {
                 cout << "Using config file: " << (string) optarg;
-		cout << endl;
+                cout << endl;
                 usercfg = true;
                 cfg = new Configuration(optarg);
 
@@ -137,14 +137,12 @@ int main(int argc, char *argv[]) {
     }
     
 
-    if (!usercfg)
-    {
-
-         const char *cfg_path = "/home/controller/.lofasm/lofasm.cfg";
-	 cout << "\nUsing default configuration file: ";
-	 cout << "/home/controller/.lofasm/lofasm.cfg\n";
-	 cfg = new Configuration(cfg_path);
-
+    if (!usercfg) {
+        const char* cfg_path = "/home/controller/.lofasm/lofasm.cfg";
+        cout << "\nUsing default configuration file: ";
+        cout << "/home/controller/.lofasm/lofasm.cfg\n";
+        cfg = new Configuration(cfg_path);
+        cout << __FILE__ << " : " << __LINE__ << endl;
     }
 
 
