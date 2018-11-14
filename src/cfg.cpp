@@ -27,9 +27,7 @@ Configuration::Configuration(const char *infile)
 {
     cfgfields = new std::vector<cfgfield*>;
     cfgfile = infile;
-
     n = readcfg();
-
 
     //populate member variables
     for (int i=0; i<n; i++)
@@ -46,7 +44,7 @@ Configuration::Configuration(const char *infile)
         }
         else if (field.name == "blocktime")
         {
-            blocktime = std::stof(field.value);
+            blocktime = std::stoi(field.value);
         }
         else if (field.name == "station_id")
         {
@@ -139,44 +137,60 @@ Configuration::Configuration(const char *infile)
     } // end for loop
 } // end Configuration definition
 
-
-int Configuration::readcfg() {
-    /*
-        Read settings from a configuration file and append each cfgfield to vector cfgfields.
-
-        Return number of fields processed.
-    */
-
+int Configuration::readcfg(){
     std::ifstream cfg(cfgfile);
-
-    int linecount = 0;
-
-    if (!cfg.is_open()) {
-        error("Could not open file for reading");
+    if (!cfg.is_open()){
+        std::cout << "Unable to open config file." << std::endl;
     }
-    else
-    {
-        std::cout << "Reading configuration file: " << cfgfile << std::endl;
+    else {
+        std::cout << "Reading: " << cfgfile << std::endl;
     }
 
-    std::string fieldname, fieldval;
+    int n_fields = 0;
+    int bufsize = 256;
+    char buf[bufsize];
+    std::string line, fieldname, fieldval;
+    bool inSection = false;
+    std::string sectionName = "[lofasmrec]";
+    std::string::size_type eq_pos;
+    while (cfg.getline(buf, bufsize)){
+        line = buf;
 
-    /*
-        Iterate over lines in config file and place them in the vector cfgfields.
-    */
-    while (cfg >> fieldname >> fieldval)
-    {
-        cfgfield* cfgline = new cfgfield;
+        // ignore commented lines
+        if (line.empty() || std::string::npos != line.substr(0, 1).find('#')){
+            continue; // to next line
+        }
 
-        cfgline->name = fieldname;
-        cfgline->value = fieldval;
+        if (!inSection){
+            if (std::string::npos != line.find(sectionName)){
+                inSection = true;
+                continue;
+            }
+        }
+        else {
+            // check if another section has started
+            if (std::string::npos != line.find('[') && std::string::npos != line.find(']')) {
+                // new config section has started
+                break;
+            }
 
-        cfgfields->push_back(cfgline);
+            eq_pos = line.find(" = ");
+            if (eq_pos == std::string::npos) {
+                // equal sign not found in this line. ignore line.
+                std::cout << "Skipping line due to formatting: " << line << std::endl;
+                continue;
+            }
+            else {
+                fieldname = line.substr(0, eq_pos);
+                fieldval = line.substr(eq_pos+3, line.size());
+                std::cout << ++n_fields << ": ";
+                std::cout << "Processing field: " << fieldname << ": " << fieldval << std::endl;
+            }
 
-        linecount++;
+        }
+
     }
-
-    return linecount;
+    return n_fields;
 }
 
 

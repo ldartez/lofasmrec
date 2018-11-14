@@ -76,10 +76,10 @@ void constructFileHeader(std::string *buf, time_t t, Configuration cfg, int Nsam
     }
     else if (header_version == 5)
     {
-	hdrlen = std::to_string((int) 128);
-	hdrver = std::to_string((int) header_version);
-	offset_len = HDRENTRYLEN - hdrlen.size();
-	offset_ver = HDRENTRYLEN - hdrver.size();
+        hdrlen = std::to_string((int) 128);
+        hdrver = std::to_string((int) header_version);
+        offset_len = HDRENTRYLEN - hdrlen.size();
+        offset_ver = HDRENTRYLEN - hdrver.size();
     }
 
     // populate header length and version

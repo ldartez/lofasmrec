@@ -1,0 +1,7 @@
+cmake_minimum_required (VERSION 2.6)
+project(lofasmrec)
+set (CMAKE_CXX_STANDARD 11)
+include_directories($ENV{CMAKE_INCLUDE_PATH})
+link_directories($ENV{CMAKE_LIBRARY_PATH})
+add_executable (lofasmrec main.cpp cfg.cpp err.cpp fhdr.cpp lfrec.cpp mjd.cpp obs.cpp)
+target_link_libraries(lofasmrec gzstream z)
