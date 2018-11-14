@@ -184,6 +184,7 @@ int Configuration::readcfg(){
                 fieldname = line.substr(0, eq_pos);
                 fieldval = line.substr(eq_pos+3, line.size());
                 n_fields++;
+                std::cout << n_fields << ": " << fieldname << " = " << fieldval << std::endl;
             }
         }
     }
