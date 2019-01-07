@@ -142,7 +142,6 @@ int main(int argc, char *argv[]) {
         cout << "\nUsing default configuration file: ";
         cout << "/home/controller/.lofasm/lofasm.cfg\n";
         cfg = new Configuration(cfg_path);
-        cout << __FILE__ << " : " << __LINE__ << endl;
     }
 
 

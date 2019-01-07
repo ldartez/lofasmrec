@@ -28,6 +28,9 @@ Configuration::Configuration(const char *infile)
     cfgfields = new std::vector<cfgfield*>;
     cfgfile = infile;
     n = readcfg();
+    //std::cout << "out of readcfg @ " << __FILE__ << ":" << __LINE__ << std::endl;
+    //std::cout << "readcfg returned " << n << std::endl;
+    //std::cout << "cfgfields length is " << cfgfields->size() << std::endl;
 
     //populate member variables
     for (int i=0; i<n; i++)
@@ -185,10 +188,13 @@ int Configuration::readcfg(){
                 fieldval = line.substr(eq_pos+3, line.size());
                 n_fields++;
                 std::cout << n_fields << ": " << fieldname << " = " << fieldval << std::endl;
+                cfgfield* cfield = new cfgfield();
+                cfield->name = fieldname;
+                cfield->value = fieldval;
+                cfgfields->push_back(cfield);
             }
         }
     }
-    std::cout << "end of readcfg" << std::endl;
     cfg.close();
     return n_fields;
 }
