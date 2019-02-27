@@ -1,2 +1,4 @@
 *.remote-sync.json
 *.o
+*.idea
+*.json

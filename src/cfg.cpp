@@ -19,7 +19,7 @@
 #define STRING_INCLUDE_GUARD
 #include <string>
 #endif
-
+#include <cstring>
 #include "err.h"
 
 
@@ -122,21 +122,26 @@ Configuration::Configuration(const char *infile)
             bbr_id = std::stoi(field.value);
         }
         else if (field.name == "trunkA")
-            {
-                trunkA = field.value;
-            }
+        {
+            trunkA = field.value;
+        }
         else if (field.name == "trunkB")
-            {
-                trunkB = field.value;
-            }
+        {
+            trunkB = field.value;
+        }
         else if (field.name == "trunkC")
-            {
-                trunkC = field.value;
-            }
+        {
+            trunkC = field.value;
+        }
         else if (field.name == "trunkD")
-            {
-                trunkD = field.value;
-            }
+        {
+            trunkD = field.value;
+        }
+        else if (field.name == "dev")
+        {
+            dev = field.value;
+            std::cout << "copied dev\n";
+        }
     } // end for loop
 } // end Configuration definition
 
@@ -156,6 +161,8 @@ int Configuration::readcfg(){
     bool inSection = false;
     std::string sectionName = "[lofasmrec]";
     std::string::size_type eq_pos;
+
+    // parse cfg lines
     while (cfg.getline(buf, bufsize)){
         line = buf;
 

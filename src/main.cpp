@@ -176,7 +176,8 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
 
-    record_timed(tin, *cfg);
+    //record_timed(tin, *cfg);
+    record_pcap(tin, *cfg);
     exit(0);
 }
 
