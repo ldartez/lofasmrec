@@ -176,8 +176,16 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
 
-    //record_timed(tin, *cfg);
-    record_pcap(tin, *cfg);
+    // execute chose recording mode
+    if (cfg->proto == "raw")
+    {
+        record_timed(tin, *cfg);
+    }
+    else if (cfg->proto == "pcap")
+    {
+        record_pcap(tin, *cfg);
+    }
+
     exit(0);
 }
 

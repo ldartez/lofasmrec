@@ -34,7 +34,7 @@ public:
     float tsamp;
     int hdrlength;
     int blocksize, bbr_id;
-    std::string dev;
+    std::string dev, proto;
     std::string trunkA, trunkB, trunkC, trunkD; // for header verion 5
 
     Configuration(const char *);

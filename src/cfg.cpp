@@ -140,7 +140,11 @@ Configuration::Configuration(const char *infile)
         else if (field.name == "dev")
         {
             dev = field.value;
-            std::cout << "copied dev\n";
+            //std::cout << "copied dev\n";
+        }
+        else if (field.name == "proto")
+        {
+            proto = field.value;
         }
     } // end for loop
 } // end Configuration definition

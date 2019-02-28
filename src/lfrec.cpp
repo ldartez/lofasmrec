@@ -15,15 +15,15 @@
 #include <math.h>
 #endif
 
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <arpa/inet.h>
+
 #include <fstream>
 #include <vector>
 #include <gzstream.h>
 #include <pcap.h>
 #include <cstdio>
-
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <arpa/inet.h>
 #include "lfrec.h"
 #include "fhdr.h"
 #include "mjd.h"
@@ -126,7 +126,7 @@ void record_timed(float recdur, Configuration cfg) {
     server.sin_port = htons(port);
 
     // bind to socket address and port
-    int bind_res = ::bind(sock, (struct sockaddr *)&server, addr_length);
+    int bind_res = bind(sock, (struct sockaddr *)&server, addr_length);
     if (bind_res == -1) {
         cout << "socket addr: " << ip_addr << endl;
         cout << "socket port: " << port << endl;
