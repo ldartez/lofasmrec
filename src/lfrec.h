@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <string>
 #include <gzstream.h>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 
 // callback struct for pcap loop callback argument passing
@@ -21,7 +22,7 @@ struct callback_args {
 
 void record_timed(float, Configuration);
 void record_pcap(float, Configuration);
-std::string construct_filename(time_t, Configuration);
+std::string construct_filename(boost::posix_time::ptime, Configuration);
 std::string fmt_val(int, size_t);
 void handle_packet(u_char *, const struct pcap_pkthdr *, const u_char *);
 

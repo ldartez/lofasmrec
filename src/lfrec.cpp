@@ -24,14 +24,19 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
+#include <iomanip>
 #include "lfrec.h"
 #include "fhdr.h"
 #include "mjd.h"
 #include "err.h"
 #include "cfg.h"
 #include "obs.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 using namespace std;
+namespace pt = boost::posix_time;
+namespace gd = boost::gregorian;
 
 
 
@@ -72,7 +77,7 @@ void record_timed(float recdur, Configuration cfg) {
     in_port_t port = (in_port_t) port_in;
     const char *ip_addr = ipaddr_in.c_str();
 
-    time_t t; // timestamp for beginning of current file
+    pt::ptime t; // timestamp for beginning of current file
     float tsamp; // filterbank sampling time
 
     int HDRLENGTH;
@@ -94,10 +99,6 @@ void record_timed(float recdur, Configuration cfg) {
     }
 
 
-    // convert dataroot into char array
-    //std::vector<char> fp(dataroot.size()+50);
-    //std::strcpy(&fp[0], dataroot.c_str());
-    //char *fpath = &fp[0];
     string fpath;
 
     Observation obs = Observation(recdur, cfg);
@@ -156,7 +157,7 @@ void record_timed(float recdur, Configuration cfg) {
         }
 
         // create filename
-        t = time(nullptr);
+        t = pt::microsec_clock::universal_time();
 
         // get filename in format YYYYMMDD_HHMMSS.<extension>
         fname = construct_filename(t, cfg);
@@ -292,7 +293,7 @@ void record_pcap(float recdur, Configuration cfg) {
     cout << "Done setting up pcap settings.\n";
 
 
-    time_t t; // timestamp for beginning of current file
+    pt::ptime t; // timestamp for beginning of current file
     float tsamp; // filterbank sampling time
 
     int HDRLENGTH;
@@ -338,8 +339,8 @@ void record_pcap(float recdur, Configuration cfg) {
             Nsamp = Npkts/17;
         }
 
-        // get timestamp
-        t = time(nullptr);
+        // get timestamp using Boost library
+        t = pt::microsec_clock::universal_time();
 
         // get filename in format YYYYMMDD_HHMMSS.<extension>
         fname = construct_filename(t, cfg);
@@ -418,37 +419,40 @@ void handle_packet(u_char *args, const struct pcap_pkthdr *header, const u_char 
         cerr << "empty packet?\n";
     }
 }
-string construct_filename(time_t t, Configuration cfg) {
+string construct_filename(pt::ptime t, Configuration cfg) {
     /*
     Construct LoFASM data file name using current date.
     Filename is stored in fname as a character array.
     The current time is returned as a time_t object.
     */
-    string fname;
-    fname.reserve(30);
-    tm *gm = gmtime(&t);
-    fname += fmt_val((int) 1900+gm->tm_year, 4);
-    fname += fmt_val((int) 1+gm->tm_mon, 2);
-    fname += fmt_val((int) gm->tm_mday, 2);
-    fname += "_";
-    fname += fmt_val((int) gm->tm_hour, 2);
-    fname += fmt_val((int) gm->tm_min, 2);
-    fname += fmt_val((int) gm->tm_sec, 2);
+    stringstream fname;
 
+    gd::date date = t.date(); // get the date portion of the timestamp
+    auto ymd = date.year_month_day();
+    pt::time_duration tod = t.time_of_day();
+
+    fname << ymd.year;
+    fname << setw(2) << setfill('0') << (int) ymd.month;
+    fname << setw(2) << setfill('0') << ymd.day;
+    fname << '_';
+    fname << setw(2) << setfill('0') << tod.hours();
+    fname << setw(2) << setfill('0') << tod.minutes();
+    fname << setw(2) << setfill('0') << tod.seconds();
+    
     if (cfg.rec_mode == 1) // bbr mode
         {
-            fname += "_";
-            fname += to_string(cfg.bbr_id);
-            fname += ".bbr";
+            fname << "_";
+            fname << to_string(cfg.bbr_id);
+            fname << ".bbr";
         }
     else if (cfg.rec_mode == 2) // spectrometer mode
         {
-            fname += ".lofasm";
+            fname << ".lofasm";
         }
 
-    fname += ".gz";
+    fname << ".gz";
 
-    return fname;
+    return fname.str();
 }
 
 string fmt_val(int val, size_t size) {

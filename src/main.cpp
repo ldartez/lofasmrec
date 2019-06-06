@@ -37,6 +37,8 @@
 #include <iomanip>
 #include <chrono>
 #include <string>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 // LoFASM header files
 #include "fhdr.h" // LoFASM file header version 3 routines
@@ -46,9 +48,8 @@
 #include "obs.h"
 
 using namespace std;
-//using std::cout;
-//using std::endl;
-//using std::vector;
+namespace pt = boost::posix_time;
+namespace gd = boost::gregorian;
 
 // function prototypes
 void error(const char*);
@@ -166,7 +167,7 @@ int main(int argc, char *argv[]) {
             // print mock file header
             string hdr;
             int Nsamp = obs->Npkts / 17;
-            time_t t = time(nullptr);
+            pt::ptime t = pt::microsec_clock::universal_time();
             string fname = construct_filename(t, *cfg);
 
             constructFileHeader(&hdr, t, *cfg, Nsamp);
