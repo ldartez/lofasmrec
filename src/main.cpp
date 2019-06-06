@@ -188,7 +188,9 @@ int main(int argc, char *argv[]) {
         cout << "recording pcap (new-style)" << endl;
         record_pcap(tin, *cfg);
     }
-    cout << "no protocol specified in config file. exiting. " << endl;
+    else {
+        cout << "no protocol specified in config file. exiting. " << endl;
+    }
 
     exit(0);
 }
