@@ -180,12 +180,15 @@ int main(int argc, char *argv[]) {
     // execute chose recording mode
     if (cfg->proto == "raw")
     {
+        cout << "recording timed (old-style)" << endl;
         record_timed(tin, *cfg);
     }
     else if (cfg->proto == "pcap")
     {
+        cout << "recording pcap (new-style)" << endl;
         record_pcap(tin, *cfg);
     }
+    cout << "no protocol specified in config file. exiting. " << endl;
 
     exit(0);
 }
