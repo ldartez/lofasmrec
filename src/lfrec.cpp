@@ -31,7 +31,6 @@
 #include "cfg.h"
 #include "obs.h"
 
-
 using namespace std;
 
 
@@ -339,7 +338,7 @@ void record_pcap(float recdur, Configuration cfg) {
             Nsamp = Npkts/17;
         }
 
-        // create filename
+        // get timestamp
         t = time(nullptr);
 
         // get filename in format YYYYMMDD_HHMMSS.<extension>
@@ -487,3 +486,4 @@ string fmt_val(int val, size_t size) {
 
     return result;
 }
+
