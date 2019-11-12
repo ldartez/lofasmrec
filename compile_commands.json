@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/main.cpp.o -c /home/louis/repos/lofasmrec/src/main.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/main.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/cfg.cpp.o -c /home/louis/repos/lofasmrec/src/cfg.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/cfg.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/err.cpp.o -c /home/louis/repos/lofasmrec/src/err.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/err.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/fhdr.cpp.o -c /home/louis/repos/lofasmrec/src/fhdr.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/fhdr.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/lfrec.cpp.o -c /home/louis/repos/lofasmrec/src/lfrec.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/lfrec.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/mjd.cpp.o -c /home/louis/repos/lofasmrec/src/mjd.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/mjd.cpp"
+},
+{
+  "directory": "/home/louis/repos/lofasmrec/build/src",
+  "command": "/usr/bin/c++      -std=gnu++11 -o CMakeFiles/lofasmrec.dir/obs.cpp.o -c /home/louis/repos/lofasmrec/src/obs.cpp",
+  "file": "/home/louis/repos/lofasmrec/src/obs.cpp"
+}
+]
