@@ -1,2 +1,6 @@
 *.remote-sync.json
 *.o
+*.idea
+*.json
+build*
+cmake-build-debug*

@@ -37,6 +37,8 @@
 #include <iomanip>
 #include <chrono>
 #include <string>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 // LoFASM header files
 #include "fhdr.h" // LoFASM file header version 3 routines
@@ -46,9 +48,8 @@
 #include "obs.h"
 
 using namespace std;
-//using std::cout;
-//using std::endl;
-//using std::vector;
+namespace pt = boost::posix_time;
+namespace gd = boost::gregorian;
 
 // function prototypes
 void error(const char*);
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
     bool oflag = false; // output directory set
     bool usercfg = false; // user-defined config
     bool printSummary = false;
-    char *outputdir = nullptr;
+    char* outputdir = nullptr;
     float tin;
     int c;
     Configuration* cfg;
@@ -94,7 +95,7 @@ int main(int argc, char *argv[]) {
             case 'c':
             {
                 cout << "Using config file: " << (string) optarg;
-		cout << endl;
+                cout << endl;
                 usercfg = true;
                 cfg = new Configuration(optarg);
 
@@ -137,14 +138,11 @@ int main(int argc, char *argv[]) {
     }
     
 
-    if (!usercfg)
-    {
-
-         const char *cfg_path = "/home/controller/.lofasm/lofasm.cfg";
-	 cout << "\nUsing default configuration file: ";
-	 cout << "/home/controller/.lofasm/lofasm.cfg\n";
-	 cfg = new Configuration(cfg_path);
-
+    if (!usercfg) {
+        const char* cfg_path = "/home/controller/.lofasm/lofasm.cfg";
+        cout << "\nUsing default configuration file: ";
+        cout << "/home/controller/.lofasm/lofasm.cfg\n";
+        cfg = new Configuration(cfg_path);
     }
 
 
@@ -169,7 +167,7 @@ int main(int argc, char *argv[]) {
             // print mock file header
             string hdr;
             int Nsamp = obs->Npkts / 17;
-            time_t t = time(nullptr);
+            pt::ptime t = pt::microsec_clock::universal_time();
             string fname = construct_filename(t, *cfg);
 
             constructFileHeader(&hdr, t, *cfg, Nsamp);
@@ -179,7 +177,21 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
 
-    record_timed(tin, *cfg);
+    // execute chose recording mode
+    if (cfg->proto == "raw")
+    {
+        cout << "recording timed (old-style)" << endl;
+        record_timed(tin, *cfg);
+    }
+    else if (cfg->proto == "pcap")
+    {
+        cout << "recording pcap (new-style)" << endl;
+        record_pcap(tin, *cfg);
+    }
+    else {
+        cout << "no protocol specified in config file. exiting. " << endl;
+    }
+
     exit(0);
 }
 

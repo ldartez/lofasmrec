@@ -18,7 +18,8 @@
 #include "err.h"
 #include "cfg.h"
 #include <cmath>
-void constructFileHeader(std::string *buf, time_t t, Configuration cfg, int Nsamp)
+
+void constructFileHeader(std::string *buf, boost::posix_time::ptime t, Configuration cfg, int Nsamp)
 {
      /*
      * Construct header string for .lofasm data format

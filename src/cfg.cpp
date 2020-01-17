@@ -19,7 +19,7 @@
 #define STRING_INCLUDE_GUARD
 #include <string>
 #endif
-
+#include <cstring>
 #include "err.h"
 
 
@@ -28,6 +28,9 @@ Configuration::Configuration(const char *infile)
     cfgfields = new std::vector<cfgfield*>;
     cfgfile = infile;
     n = readcfg();
+    //std::cout << "out of readcfg @ " << __FILE__ << ":" << __LINE__ << std::endl;
+    //std::cout << "readcfg returned " << n << std::endl;
+    //std::cout << "cfgfields length is " << cfgfields->size() << std::endl;
 
     //populate member variables
     for (int i=0; i<n; i++)
@@ -119,21 +122,30 @@ Configuration::Configuration(const char *infile)
             bbr_id = std::stoi(field.value);
         }
         else if (field.name == "trunkA")
-            {
-                trunkA = field.value;
-            }
+        {
+            trunkA = field.value;
+        }
         else if (field.name == "trunkB")
-            {
-                trunkB = field.value;
-            }
+        {
+            trunkB = field.value;
+        }
         else if (field.name == "trunkC")
-            {
-                trunkC = field.value;
-            }
+        {
+            trunkC = field.value;
+        }
         else if (field.name == "trunkD")
-            {
-                trunkD = field.value;
-            }
+        {
+            trunkD = field.value;
+        }
+        else if (field.name == "dev")
+        {
+            dev = field.value;
+            //std::cout << "copied dev\n";
+        }
+        else if (field.name == "proto")
+        {
+            proto = field.value;
+        }
     } // end for loop
 } // end Configuration definition
 
@@ -153,6 +165,8 @@ int Configuration::readcfg(){
     bool inSection = false;
     std::string sectionName = "[lofasmrec]";
     std::string::size_type eq_pos;
+
+    // parse cfg lines
     while (cfg.getline(buf, bufsize)){
         line = buf;
 
@@ -184,10 +198,13 @@ int Configuration::readcfg(){
                 fieldname = line.substr(0, eq_pos);
                 fieldval = line.substr(eq_pos+3, line.size());
                 n_fields++;
+                std::cout << n_fields << ": " << fieldname << " = " << fieldval << std::endl;
+                cfgfield* cfield = new cfgfield();
+                cfield->name = fieldname;
+                cfield->value = fieldval;
+                cfgfields->push_back(cfield);
             }
-
         }
-
     }
     cfg.close();
     return n_fields;

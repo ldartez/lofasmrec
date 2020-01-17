@@ -1,10 +1,20 @@
 #include "mjd.h"
 #include <string>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
 
+#define DAY_MICROSEC 86400000000
+#define DAY_MILLISEC 86400000
 
+double mjd_datetime() {
+    boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
+    boost::gregorian::date d(now.date());
+    // fractional day in milliseconds
+    double day_us = (now.time_of_day()).total_microseconds() / DAY_MICROSEC;
+    return d.modjulian_day() + day_us;
+}
 
-
-void mjd(mjd_t *m, time_t t)
+void mjd(mjd_t *m, boost::posix_time::ptime t)
 {
 
     /*
@@ -17,14 +27,9 @@ void mjd(mjd_t *m, time_t t)
      *
      */
 
-    double msec_day = 86400000; // milliseconds in a day
-    double s = (double) t;
+    boost::gregorian::date d(t.date());
 
-    double days = s/86400.0;
-    double nowmjd = MJD1970 + days;
+    m->days = (int) d.modjulian_day(); // integer mjd days
+    m->ms = (t.time_of_day()).total_milliseconds(); // number of milliseconds since midnight
 
-    //mjdbuf[0] = (int) nowmjd; // integer mjd days
-    //mjdbuf[1] = (nowmjd - mjdbuf[0]) * msec_day; // number of milliseconds since midnight
-    m->days = (int) nowmjd; // integer mjd days
-    m->ms = (nowmjd - m->days) * msec_day; // number of milliseconds since midnight
 }
