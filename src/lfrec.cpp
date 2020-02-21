@@ -345,7 +345,6 @@ void record_pcap(float recdur, Configuration cfg) {
         // get filename in format YYYYMMDD_HHMMSS.<extension>
         fname = construct_filename(t, cfg);
         date_dirname = fname.substr(0, 8);
-        //strncpy(fpath+dataroot.size(), fname.c_str(), fp.size()-dataroot.size());
 
         // check if date_dirname already exists
         fpath = dataroot + date_dirname;
@@ -386,21 +385,6 @@ void record_pcap(float recdur, Configuration cfg) {
         }
 
         pcap_loop(pcap_handle, Npkts, handle_packet, (u_char *) &cb_args);
-        /*
-        // packet write loop
-        for (int k=0; k<Npkts; k++)
-            {
-                n = recv(sock, buf, 8192, 0);
-                if (n<0)
-                    {
-                        std::cout << "error: recv\n";
-                        ofile.close();
-                        exit(1);
-                    }
-                 ofile.write(buf, (size_t) n);
-                 nblk += n;
-            }
-        */
         ntotal += nblk;
         ofile.close();
     }
@@ -412,7 +396,6 @@ void handle_packet(u_char *args, const struct pcap_pkthdr *header, const u_char 
     if ( header->len > 0 ) {
         ogzstream *ofile = cb_args->ofile;
         cb_args->payload = (u_char *) (packet + 42);
-        //printf("packet: %d len: %d\n", ++cb_args->id, header->len);
         ofile->write((const char *) cb_args->payload, (size_t) 8192);
     }
     else {
